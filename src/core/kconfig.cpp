@@ -28,7 +28,6 @@
 #include <QLocale>
 #include <QMutexLocker>
 #include <QProcess>
-#include <QRegularExpression>
 #include <QSet>
 #include <QThreadStorage>
 #include <QTimeZone>
@@ -580,23 +579,12 @@ struct KConfigStaticData {
     QString globalMainConfigName;
     // Keep a copy so we can use it in global dtors, after qApp is gone
     QStringList appArgs;
-    QString windowsRegistryKey;
 };
 Q_GLOBAL_STATIC(KConfigStaticData, globalData)
 
 void KConfig::setMainConfigName(const QString &str)
 {
     globalData()->globalMainConfigName = str;
-}
-
-void KConfig::setWindowsRegistryKey(const QString &registryKey)
-{
-    globalData()->windowsRegistryKey = registryKey;
-}
-
-QString KConfig::windowsRegistryKey()
-{
-    return globalData()->windowsRegistryKey;
 }
 
 QString KConfig::mainConfigName()
@@ -690,8 +678,8 @@ void KConfig::reparseConfiguration()
     }
 
     // Parse the windows registry defaults if desired
-    if (!name().contains(QRegularExpression(QStringLiteral("^[A-Z]:/")))) {
-        d->parseWindowsDefaults(name() != mainConfigName() ? name() : QString());
+    if (d->openFlags & ~KConfig::SimpleConfig) {
+        d->parseWindowsDefaults();
     }
 
     d->parseConfigFiles();
@@ -766,16 +754,11 @@ void KConfigPrivate::parseGlobalFiles()
     sGlobalParse->localData().insert(key, new ParseCacheValue({entryMap, newest}));
 }
 
-void KConfigPrivate::parseWindowsDefaults(const QString &subkey)
+void KConfigPrivate::parseWindowsDefaults()
 {
-    auto registryKey = KConfig::windowsRegistryKey();
-    if (registryKey.isEmpty()) {
-        registryKey = QStringLiteral("SOFTWARE\\%1\\%2").arg(QCoreApplication::organizationName(), QCoreApplication::applicationName());
-    }
-    if (!subkey.isEmpty()) {
-        registryKey = QStringLiteral("%1\\%2").arg(registryKey, subkey);
-    }
-    parseWindowsRegistry(registryKey, entryMap);
+    auto registryKey =
+        QStringLiteral("SOFTWARE\\%1\\%2")
+            .arg(QCoreApplication::organizationName(), fileName.endsWith(QStringLiteral("rc")) ? fileName.left(fileName.length() - 2) : fileName);
 }
 
 void KConfigPrivate::parseConfigFiles()

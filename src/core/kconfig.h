@@ -344,37 +344,6 @@ public:
      */
     static QString mainConfigName();
 
-    /**
-     * Set the key to look up config defaults in the windows registry
-     *
-     * By default, HKLM\\SOFTWARE\\$ORGANIZATION_NAME\\$APPLICATION_NAME and
-     * HKCU\\SOFTWARE\\$ORGANIZATION_NAME\\$APPLICATION_NAME are used
-     *
-     * Keys below this key are treated as configuration
-     * groups. Values below this key are treated as values
-     * of the default group.
-     *
-     * To add a key to a group create a subkey under regKey and
-     * add the value in this group with type REG_SZ.
-     *
-     * Immutable groups or values can be suffixed with [$i].
-     *
-     * The values are read both form HKLM and HKCU
-     * and are treated as defaults. The use case for this is
-     * that Group Policies can set defaults for specific
-     * users and groups. User configuration is still stored
-     * in the main config file.
-     *
-     * @since 6.1
-     */
-    static void setWindowsRegistryKey(const QString &regKey);
-
-    /**
-     * Get the organization name to be used for loading configuration from the widows registry.
-     * @since 6.1
-     */
-    static QString windowsRegistryKey();
-
 protected:
     bool hasGroupImpl(const QString &groupName) const override;
     KConfigGroup groupImpl(const QString &groupName) override;

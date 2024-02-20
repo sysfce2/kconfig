@@ -26,7 +26,7 @@ target_sources(KF6ConfigCore PRIVATE
 )
 
 if (WIN32)
-    target_sources(KF5ConfigCore PRIVATE registry_win.cpp)
+    target_sources(KF6ConfigCore PRIVATE registry_win.cpp)
 endif()
 
 ecm_qt_declare_logging_category(KF6ConfigCore
