@@ -22,11 +22,11 @@ void parseRegValues(const QString &groupName, QSettings &settings, KEntryMap &en
         if (groupImmutable) {
             entryOptions |= KEntryMap::EntryImmutable;
         }
-        if (entryMap.getEntryOption(groupName.toUtf8(), key.toUtf8(), KEntryMap::SearchDefaults, KEntryMap::EntryImmutable)) {
+        if (entryMap.getEntryOption(groupName, key.toUtf8(), KEntryMap::SearchDefaults, KEntryMap::EntryImmutable)) {
             continue;
         }
         // qWarning() << "Loading group" << groupName << "key" << key << "value" << value << entryOptions;
-        entryMap.setEntry(groupName.toUtf8(), key.toUtf8(), value.toUtf8(), entryOptions);
+        entryMap.setEntry(groupName, key.toUtf8(), value.toUtf8(), entryOptions);
     }
 }
 
