@@ -22,6 +22,7 @@ void parseRegValues(const QString &groupName, QSettings &settings, KEntryMap &en
         if (groupImmutable) {
             entryOptions |= KEntryMap::EntryImmutable;
         }
+        key = key.replace(QLatin1Char('\\'), QLatin1Char('/'));
         if (entryMap.getEntryOption(groupName, key.toUtf8(), KEntryMap::SearchDefaults, KEntryMap::EntryImmutable)) {
             continue;
         }
