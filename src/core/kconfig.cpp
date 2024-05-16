@@ -42,7 +42,9 @@
 #include <QDBusMetaType>
 #endif
 
+#ifdef Q_OS_WIN
 #include "registry_win_p.h"
+#endif
 
 bool KConfigPrivate::mappingsRegistered = false;
 
@@ -677,10 +679,12 @@ void KConfig::reparseConfiguration()
         d->parseGlobalFiles();
     }
 
+#ifdef Q_OS_WIN
     // Parse the windows registry defaults if desired
     if (d->openFlags & ~KConfig::SimpleConfig) {
         d->parseWindowsDefaults();
     }
+#endif
 
     d->parseConfigFiles();
 }
@@ -754,12 +758,15 @@ void KConfigPrivate::parseGlobalFiles()
     sGlobalParse->localData().insert(key, new ParseCacheValue({entryMap, newest}));
 }
 
+#ifdef Q_OS_WIN
 void KConfigPrivate::parseWindowsDefaults()
 {
     auto registryKey =
         QStringLiteral("SOFTWARE\\%1\\%2")
             .arg(QCoreApplication::organizationName(), fileName.endsWith(QStringLiteral("rc")) ? fileName.left(fileName.length() - 2) : fileName);
+    parseWindowsRegistry(registryKey, entryMap);
 }
+#endif
 
 void KConfigPrivate::parseConfigFiles()
 {

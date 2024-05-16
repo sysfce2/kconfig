@@ -5,10 +5,15 @@
 
     SPDX-License-Identifier: LGPL-2.0-or-later
 */
-#include "kconfig_core_log_settings.h"
+
 #include "registry_win_p.h"
 
 #include <QSettings>
+
+enum Registry {
+    HKLM,
+    HKCU,
+};
 
 void parseRegValues(const QString &groupName, QSettings &settings, KEntryMap &entryMap, bool groupImmutable)
 {
@@ -26,7 +31,6 @@ void parseRegValues(const QString &groupName, QSettings &settings, KEntryMap &en
         if (entryMap.getEntryOption(groupName, key.toUtf8(), KEntryMap::SearchDefaults, KEntryMap::EntryImmutable)) {
             continue;
         }
-        // qWarning() << "Loading group" << groupName << "key" << key << "value" << value << entryOptions;
         entryMap.setEntry(groupName, key.toUtf8(), value.toUtf8(), entryOptions);
     }
 }
@@ -37,22 +41,27 @@ void parseRegSubkeys(const QString &baseGroup, QSettings &settings, KEntryMap &e
 
     for (auto &group : settings.childGroups()) {
         bool groupImmutable = immutable;
+        QString groupWithoutSuffix = group;
         if (group.endsWith(QStringLiteral("[$i]"))) {
+            groupWithoutSuffix.chop(4);
             groupImmutable = true;
         }
         settings.beginGroup(group);
-        parseRegSubkeys((baseGroup == QStringLiteral("<default>") ? QString() : (baseGroup + QLatin1Char('\x1d')))
-                            + (group.endsWith(QStringLiteral("[$i]")) ? group.chopped(4) : group),
+        parseRegSubkeys((baseGroup == QStringLiteral("<default>") ? QString() : (baseGroup + QLatin1Char('\x1d'))) + groupWithoutSuffix,
                         settings,
                         entryMap,
                         groupImmutable);
         settings.endGroup();
+        entryMap.setEntry((baseGroup == QStringLiteral("<default>") ? QString() : (baseGroup + QLatin1Char('\x1d'))) + groupWithoutSuffix,
+                          {},
+                          QByteArray(),
+                          groupImmutable ? KEntryMap::EntryImmutable : (KEntryMap::EntryOptions)0);
     }
 }
 
-void parseRegistry(const QString &regKey, KEntryMap &entryMap, bool userRegistry)
+void parseRegistry(const QString &regKey, KEntryMap &entryMap, Registry registry)
 {
-    QString registryPath = (userRegistry ? QStringLiteral("HKEY_CURRENT_USER\\") : QStringLiteral("HKEY_LOCAL_MACHINE\\")) + regKey;
+    QString registryPath = (registry == HKCU ? QStringLiteral("HKEY_CURRENT_USER\\") : QStringLiteral("HKEY_LOCAL_MACHINE\\")) + regKey;
     QSettings settings(registryPath, QSettings::NativeFormat);
     parseRegSubkeys(QStringLiteral("<default>"), settings, entryMap, false);
 }
@@ -60,7 +69,7 @@ void parseRegistry(const QString &regKey, KEntryMap &entryMap, bool userRegistry
 void parseWindowsRegistry(const QString &regKey, KEntryMap &entryMap)
 {
     // First take the HKLM values into account
-    parseRegistry(regKey, entryMap, false);
+    parseRegistry(regKey, entryMap, HKLM);
     // Then HKCU
-    parseRegistry(regKey, entryMap, true);
+    parseRegistry(regKey, entryMap, HKCU);
 }

@@ -7,10 +7,4 @@
 */
 #include "kconfigdata_p.h"
 
-#ifdef Q_OS_WIN
 void parseWindowsRegistry(const QString &regKey, KEntryMap &entryMap);
-#else
-void parseWindowsRegistry(const QString &, KEntryMap &)
-{
-}
-#endif
