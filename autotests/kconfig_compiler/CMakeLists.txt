@@ -44,13 +44,13 @@ function(kconfig_compiler_test ARG_NAME)
 
     ecm_add_test(TEST_NAME ${ARG_NAME} ${ARG_MAIN})
     KCONFIG_ADD_KCFG_FILES(${ARG_NAME} "${ARG_KCFGC}" ${_moc})
-    target_link_libraries(${ARG_NAME} Qt6::Test KF6::ConfigGui)
+    target_link_libraries(${ARG_NAME} Qt6::Test Qt6::Qml KF6::ConfigGui)
 
     ecm_add_test(TEST_NAME ${ARG_NAME}_cmake ${ARG_MAIN})
     get_filename_component(_kcfg_we "${ARG_KCFG}" NAME_WE)
     configure_file("${ARG_KCFG}" "${_kcfg_we}_cmake.kcfg" COPYONLY)
     kconfig_target_kcfg_file(${ARG_NAME}_cmake FILE "${CMAKE_CURRENT_BINARY_DIR}/${_kcfg_we}_cmake.kcfg" CLASS_NAME "${ARG_CLASS_NAME}" ${_moc} ${ARG_UNPARSED_ARGUMENTS})
-    target_link_libraries(${ARG_NAME}_cmake Qt6::Test KF6::ConfigGui)
+    target_link_libraries(${ARG_NAME}_cmake Qt6::Test Qt6::Qml KF6::ConfigGui)
 endfunction()
 
 kconfig_compiler_test(Test1 PARENT_IN_CONSTRUCTOR MUTATORS)
@@ -77,6 +77,8 @@ kconfig_target_kcfg_file(Test11_cmake FILE test11a.kcfg CLASS_NAME Test11a MUTAT
 
 kconfig_compiler_test(Test12 test12main.cpp)
 kconfig_compiler_test(Test13 test13main.cpp MUTATORS GENERATE_PROPERTIES GENERATE_MOC)
+kconfig_compiler_test(Test14 KCFGC test14.kcfgc KCFG test14.kcfg CLASS_NAME Test14 GENERATE_PROPERTIES GENERATE_MOC SINGLETON QML_REGISTRATION)
+kconfig_compiler_test(Test15 CLASS_NAME Test15 GENERATE_PROPERTIES GENERATE_MOC SINGLETON QML_REGISTRATION)
 
 kconfig_compiler_test(test_state_config MAIN test_state_config_main.cpp CLASS_NAME MyStateConfig MUTATORS ITEM_ACCESSORS GENERATE_MOC)
 kconfig_compiler_test(test_emptyentries MAIN test_emptyentries_main.cpp CLASS_NAME QMakeBuilderSettings SINGLETON GENERATE_MOC)
