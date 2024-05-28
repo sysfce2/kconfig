@@ -42,7 +42,7 @@ endif()
 # shall we use DBus?
 # enabled per default on Linux & BSD systems
 set(USE_DBUS_DEFAULT OFF)
-if(LINUX OR BSD)
+if(UNIX AND NOT APPLE AND NOT ANDROID AND NOT HAIKU)
     set(USE_DBUS_DEFAULT ON)
 endif()
 option(USE_DBUS "Build components using DBus" ${USE_DBUS_DEFAULT})
