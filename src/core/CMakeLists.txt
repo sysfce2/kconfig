@@ -1,7 +1,12 @@
 add_library(KF6ConfigCore)
 add_library(KF6::ConfigCore ALIAS KF6ConfigCore)
 
-qt_extract_metatypes(KF6ConfigCore)
+qt_extract_metatypes(KF6ConfigCore OUTPUT_FILES METATYPES_FILE)
+
+# see https://qt-project.atlassian.net/browse/QTBUG-123052
+# might be replaced with proper Qt API once that exists
+get_filename_component(METATYPES_FILE_NAME ${METATYPES_FILE} NAME)
+target_sources(KF6ConfigCore INTERFACE $<INSTALL_INTERFACE:${KDE_INSTALL_QTMETATYPESDIR}/${METATYPES_FILE_NAME}>)
 
 set_target_properties(KF6ConfigCore PROPERTIES
     VERSION     ${KCONFIG_VERSION}
@@ -96,3 +101,5 @@ install(FILES
   ${KConfigCore_HEADERS}
   DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF}/KConfigCore COMPONENT Devel
 )
+
+install(FILES ${METATYPES_FILE} DESTINATION ${KDE_INSTALL_QTMETATYPESDIR})
